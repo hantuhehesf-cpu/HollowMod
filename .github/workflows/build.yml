@@ -10,6 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Extract Project ZIP
+        run: |
+          unzip project.zip -d .
+          rm project.zip
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
