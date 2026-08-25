@@ -1,0 +1,50 @@
+# Automatically build the project and run any configured tests for every push
+# and submitted pull request. This can help catch issues that only occur on
+# certain platforms or Java versions, and provides a first line of defence
+# against bad commits.
+
+name: build
+on: [pull_request, push]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      # --- Hanya perlu jika project di-upload manual sebagai zip (mis. dari HP).
+      # HAPUS step ini jika source code sudah langsung ter-commit di repo.
+      # Otomatis "membongkar" folder pembungkus kalau ada. ---
+      - name: Extract Project ZIP dari HP
+        run: |
+          unzip -o HollowDisaster-fixed.zip -d _extracted
+          shopt -s dotglob
+          entries=(_extracted/*)
+          if [ "${#entries[@]}" -eq 1 ] && [ -d "${entries[0]}" ]; then
+            mv "${entries[0]}"/* .
+          else
+            mv _extracted/* .
+          fi
+          rm -rf _extracted HollowDisaster-fixed.zip
+
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: build
+        run: ./gradlew build
+
+      - name: capture build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: Artifacts
+          path: build/libs/
