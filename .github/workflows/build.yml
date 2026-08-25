@@ -31,10 +31,13 @@ jobs:
       - name: validate gradle wrapper
         uses: gradle/actions/wrapper-validation@v6
 
+      # Loom 1.17.x butuh JVM 21+ untuk MENJALANKAN Gradle/Loom itu sendiri.
+      # Ini TIDAK mengubah target compile mod-nya -- itu tetap Java 17,
+      # diatur terpisah lewat sourceCompatibility/targetCompatibility di build.gradle.
       - name: setup jdk
         uses: actions/setup-java@v5
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'microsoft'
 
       - name: make gradle wrapper executable
